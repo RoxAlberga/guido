@@ -1,0 +1,60 @@
+AMMINISTRAZIONE TRASPARENTE — ISTRUZIONI
+=========================================
+
+Indirizzi
+---------
+Pagina pubblica:   https://www.millenarionotazioneguidoniana.it/amministrazione-trasparente/
+Area riservata:    https://www.millenarionotazioneguidoniana.it/amministrazione-trasparente/admin.php
+
+Primo accesso
+-------------
+Nome utente e password iniziale sono in config.php (AT_UTENTE e AT_PASSWORD_INIZIALE).
+Al primo accesso cambiare subito la password dal riquadro "Cambia password":
+da quel momento la password iniziale non vale più (quella nuova è salvata cifrata
+in data/auth.json). Per ripristinarla, cancellare data/auth.json: torna valida
+quella scritta in config.php.
+
+Come funziona
+-------------
+- Nessun database. I dati dei documenti stanno in data/documenti.json,
+  i file caricati in files/. Per fare un backup basta copiare queste due cartelle.
+- Ogni documento (per esempio una riunione) ha: titolo, descrizione completa,
+  categoria, data e uno o più allegati (PDF, Word, ecc.).
+- Dall'area riservata si può: pubblicare un documento, modificarne testi e dati,
+  aggiungere o rimuovere allegati, eliminarlo.
+- Pagina pubblica: elenco dal più recente, filtro per categoria, massimo 15
+  elementi per pagina (AT_PER_PAGINA in config.php) con paginazione.
+- Ogni elemento dell'elenco è cliccabile e apre la scheda del documento
+  (documento/<id>/<titolo>) con descrizione completa, dati e allegati scaricabili,
+  più i collegamenti al documento precedente e successivo.
+- Formati ammessi e dimensione massima sono in config.php (AT_ESTENSIONI, AT_MAX_MB).
+  Il limite effettivo dipende anche dal server PHP (upload_max_filesize, post_max_size).
+- Le categorie si modificano in config.php (AT_CATEGORIE).
+
+Requisiti del server
+--------------------
+- Apache con .htaccess abilitato (già usato dal sito) e PHP 7.4 o superiore.
+- Le cartelle data/ e files/ devono essere scrivibili da PHP
+  (se il caricamento fallisce, impostare permessi 755 o, se necessario, 775).
+
+Sicurezza
+---------
+- Accesso con utente e password; dopo 5 tentativi falliti l'accesso dall'IP
+  è bloccato per 15 minuti.
+- Password salvata con hash (password_hash), sessione con cookie HttpOnly,
+  protezione CSRF su tutte le azioni.
+- La cartella data/ non è leggibile dal web; nella cartella files/ è disattivata
+  l'esecuzione di qualsiasi script e i file vengono rinominati al caricamento.
+- Le pagine dell'area riservata non sono indicizzate dai motori di ricerca.
+
+File del pacchetto
+------------------
+index.php        elenco pubblico (filtri + paginazione)
+documento.php    scheda del singolo documento
+admin.php        area riservata
+lib.php          funzioni comuni (archivio, autenticazione, navbar e footer)
+config.php       configurazione (unico file da modificare)
+trasparenza.css  stile, derivato dal CSS del sito (stesse variabili e font)
+trasparenza.js   comportamento della navbar
+data/            archivio JSON (documenti, password, tentativi di accesso)
+files/           documenti caricati
