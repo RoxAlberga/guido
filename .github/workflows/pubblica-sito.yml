@@ -1,0 +1,49 @@
+# Pubblica il sito su GitHub Pages a ogni push su main
+# (o manualmente da Actions → "Pubblica sito" → Run workflow).
+name: Pubblica sito
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Scarica il repository
+        uses: actions/checkout@v4
+
+      - name: Configura GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          # Prova ad attivare Pages da solo; se non ha i permessi,
+          # attivarlo una volta da Settings → Pages → Source: GitHub Actions.
+          enablement: true
+
+      - name: Prepara i file del sito
+        env:
+          BASE: ${{ steps.pages.outputs.base_path }}
+        run: .github/scripts/prepara-sito.sh _site "$BASE"
+
+      - name: Carica i file
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Pubblica
+        id: deploy
+        uses: actions/deploy-pages@v4
